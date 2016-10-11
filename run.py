@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 import urllib2
+import re
 
 url = 'https://www.sec.gov/Archives/edgar/data/757010/000075701012000025/n-qftftpe053112.htm'
 
@@ -17,6 +19,7 @@ for i in range(len(html)):
         #flag to signal the end of tr
         notEndTR = True
         count = 0
+        row = ''
         while notEndTR:
             line = html[i]
             #check if the tag </TR> is in the line
@@ -37,30 +40,36 @@ for i in range(len(html)):
                             pass
                         else:
                             data+=line[j]
-
                         #increment
                         j+=1
 
                     #replacing item with [space]
                     data = '' if data == '&nbsp;' else data
-                    try:
-                        if data:
-                            int(data[0])
-                    except ValueError:
-                        print data
-                        count+=1
-                        print count
                     #seperator between data
-                    if line[j:j+3] == '</T' and '&nbsp;' not in line and '$' not in line:
-                        if count < 2:
-                            data += '\t'
-                    f.write(data)
+                    if '&nbsp;' not in line and '$' not in line:
+                        if data !='':
+                            #print data
+                            data = '\t' + data
+                    row += data
+                    #f.write(data)
                 #increment to next td
                 j+=1
             #increment to next tr
             i+=1
         #TR ended
-        f.write('\n')
+        if row and row[0]=='\t':
+            row = row[1:]
+
+        rowArray = row.split('\t')
+        if rowArray[0]:
+            if len(rowArray) > 2:
+                data1 = rowArray.pop()
+                data2 = rowArray.pop()
+                data3 = '\t' + data1 + '\t' + data2
+                data4 = ' '.join(rowArray)
+                row = data4 + data3
+            row+='\n'
+            f.write(row)
 f.close()
 
 f1 = open('test.txt', 'r')
