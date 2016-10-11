@@ -11,16 +11,16 @@ a = urllib2.urlopen(url)
 html = a.readlines()
 
 
-
+#Initial editing
 for i in range(len(html)):
     if '<TR' in html[i]:
         #flag to signal the end of tr
         notEndTR = True
+        count = 0
         while notEndTR:
             line = html[i]
             #check if the tag </TR> is in the line
             notEndTR = '</TR>' not in line #termination condition
-
             #Processing the line
             for j in range(len(line)):
                 data = '' #empty string that store the data
@@ -28,17 +28,32 @@ for i in range(len(html)):
                 if line[j] == '>':
                     #avoid writing >
                     if j < len(line)-1: j+=1
+
                     while line[j] != '<' and j < len(line)-1:
                         #f.write(line[j])
-                        data+=line[j]
+
+                        #delete the dorlar sign
+                        if line[j] == '$':
+                            pass
+                        else:
+                            data+=line[j]
+
                         #increment
                         j+=1
 
                     #replacing item with [space]
-                    data = ' ' if data == '&nbsp;' else data
-
+                    data = '' if data == '&nbsp;' else data
+                    try:
+                        if data:
+                            int(data[0])
+                    except ValueError:
+                        print data
+                        count+=1
+                        print count
                     #seperator between data
-                    data+=' '
+                    if line[j:j+3] == '</T' and '&nbsp;' not in line and '$' not in line:
+                        if count < 2:
+                            data += '\t'
                     f.write(data)
                 #increment to next td
                 j+=1
@@ -47,3 +62,11 @@ for i in range(len(html)):
         #TR ended
         f.write('\n')
 f.close()
+
+f1 = open('test.txt', 'r')
+f2 = open('test2.txt', 'w')
+
+lines = f1.readlines()
+
+f1.close()
+f2.close()
