@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import urllib2
 
-url = 'https://www.sec.gov/Archives/edgar/data/757010/000075701012000025/n-qftftpe053112.htm'
+url = 'https://www.sec.gov/Archives/edgar/data/757010/000075701012000025/0000757010-12-000025.txt'
 
 #text file for html
 f = open('test.txt', 'w')
@@ -15,11 +15,51 @@ html = a.readlines()
 rowIndent = 0
 nextIndent = 0
 
+
+#data collected
+meta = False
+
+accNum = False
+
+dt = False
+
+comName = False
+
 #header
 f.write('\t'+'number_shares'+ '\t' + 'value'+ '\n')
 
 #Initial editing
 for i in range(len(html)):
+    #gathering meta data
+    if not meta:
+        metadata = html[i].split('\t')
+        if 'ACCESSION NUMBER' in html[i] and not accNum:
+            accNum = metadata.pop()
+            if accNum.endswith('\n'):
+                accNum=accNum[:-1]
+
+        if ('OF REPORT' in html[i]) and not dt:
+            dt = metadata.pop()
+            if dt.endswith('\n'):
+                dt=dt[:-1]
+            #format the day string
+            dt = dt[4:6] + '/' + dt[-2:] + '/' + dt[:4]
+
+        #company name
+        if ('COMPANY' in html[i] and 'NAME' in html[i]) and not comName:
+            comName = metadata.pop()
+            if comName.endswith('\n'):
+                comName=comName[:-1]
+
+        #all metadata are collected
+        if accNum and dt and comName:
+            f.write(accNum + '\t' + dt + '\t' + comName + '\n')
+            meta = True
+
+    #reached the end of the html file
+    if '</HTML>' in html[i]:
+        break
+    #handle exception during parsings
     try:
         if '<TR' in html[i]:
             #flag to signal the end of tr
@@ -140,5 +180,6 @@ for i in range(len(html)):
                             f.write(row)
     except IndexError:
         #handeling the mess at the end of text file
+        print 'Error'
         break
 f.close()
