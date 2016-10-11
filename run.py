@@ -15,6 +15,9 @@ html = a.readlines()
 rowIndent = 0
 nextIndent = 0
 
+#header
+f.write('\t'+'number_shares'+ '\t' + 'value'+ '\n')
+
 #Initial editing
 for i in range(len(html)):
     if '<TR' in html[i]:
@@ -107,7 +110,7 @@ for i in range(len(html)):
                 #If there is a row less than 2
                 if len(rowArray) < 2:
                     #indentation fix
-                    print rowIndent, ' - ', nextIndent
+                    #print rowIndent, ' - ', nextIndent
                     if rowIndent < nextIndent:
                         fix = True
                         firstRow = True

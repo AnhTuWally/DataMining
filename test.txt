@@ -1,3 +1,4 @@
+	number_shares	value
 Arizona Board of Regents Arizona State University System Revenue, Series C, 6.00%, 7/01/26	2,500,000	2,969,925
 Arizona Board of Regents Arizona State University System Revenue, Series C, 6.00%, 7/01/27	3,000,000	3,558,360
 Arizona Board of Regents Arizona State University System Revenue, Series C, 6.00%, 7/01/28	3,350,000	3,967,304
