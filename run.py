@@ -23,7 +23,10 @@ for i in range(len(html)):
         count = 0
         row = ''
         while notEndTR:
-            line = html[i]
+            try:
+                line = html[i]
+            except IndexError:
+                print i
             #check if the tag </TR> is in the line
             notEndTR = '</TR>' not in line #termination condition
             #Processing the line
@@ -63,7 +66,7 @@ for i in range(len(html)):
                 endIndent = html[i].find('pt')
                 #update Indentation of the current indent
                 rowIndent = float(html[i][startIndent:endIndent])
-                print rowIndent
+                #print rowIndent
                 try:
                     #find the next indentation
                     nx = i+1
@@ -96,7 +99,7 @@ for i in range(len(html)):
                     int(data2[0])
                 except ValueError:
                     validData = False
-                data3 = '\t' + data1 + '\t' + data2
+                data3 = '\t' + data2 + '\t' + data1
                 data4 = ' '.join(rowArray)
                 row = data4 + data3
                 rowArray = row.split('\t')
@@ -104,18 +107,25 @@ for i in range(len(html)):
                 #If there is a row less than 2
                 if len(rowArray) < 2:
                     #indentation fix
+                    print rowIndent, ' - ', nextIndent
                     if rowIndent < nextIndent:
                         fix = True
                         firstRow = True
                     else:
-                        row += '\n'
-                        fix = False
-                        firstRow = False
-                    prefix = row + ' '
+                        #pass if the row indentation is too big, signify the change of page
+                        if abs(rowIndent - nextIndent) > 100:
+                            pass
+                        else:
+                            row += '\n'
+                            fix = False
+                            firstRow = False
+                    #the change is too big, this is a change in page
+                    if abs(rowIndent - nextIndent) < 100:
+                        prefix = row + ' '
                 #If the row array is not less than 2, but it need to be fixed
                 elif fix:
                     row = prefix + row + '\n'
-                    if abs(rowIndent - nextIndent) > 1 :
+                    if 1 < abs(rowIndent - nextIndent) < 100:
                         fix = False
                 else:
                     row += '\n'
@@ -125,5 +135,6 @@ for i in range(len(html)):
                     firstRow = False
                     pass
                 else:
-                    f.write(row)
+                    if len(rowArray) > 2:
+                        f.write(row)
 f.close()
