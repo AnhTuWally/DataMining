@@ -62,14 +62,22 @@ for i in range(len(html)):
 
         rowArray = row.split('\t')
         if rowArray[0]:
-            if len(rowArray) > 2:
+            validData = True
+            if len(rowArray) >= 2:
                 data1 = rowArray.pop()
                 data2 = rowArray.pop()
+                try:
+                    int(data1[0])
+                    int(data2[0])
+                except ValueError:
+                    validData = False
                 data3 = '\t' + data1 + '\t' + data2
                 data4 = ' '.join(rowArray)
                 row = data4 + data3
-            row+='\n'
-            f.write(row)
+                rowArray = row.split('\t')
+            if validData and len(rowArray) > 2:
+                row+='\n'
+                f.write(row)
 f.close()
 
 f1 = open('test.txt', 'r')
