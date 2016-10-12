@@ -59,11 +59,10 @@ class Gui():
 
     #function to run the program
     def sub(self):
+        self.statLabel.config(foreground="black")
+        self.status.set('Processing')
         url = self.entry.get()
         if url:
-            self.statLabel.config(foreground="black")
-            self.status.set('Processing')
-            time.sleep(1000)
             try:
                 run.getText(url, fileOut = self.fileOut)
                 self.status.set('Done')
