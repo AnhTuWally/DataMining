@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import urllib2, tkFileDialog
+import os
 
 def getText(url = 'https://www.sec.gov/Archives/edgar/data/757010/000075701012000025/0000757010-12-000025.txt', fileOut = None):
     #text file for html
-
-    f = fileOut if fileOut else tkFileDialog.asksaveasfile(mode='w', defaultextension=".txt")
+    
+    f = fileOut if fileOut else file( str(os.getcwd()+'/'+'output.txt'), 'w')
     #f = open('output', 'w')
 
     #open the website
