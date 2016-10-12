@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-import urllib2
+import urllib2, tkFileDialog
 
-def getText(url = 'https://www.sec.gov/Archives/edgar/data/757010/000075701012000025/0000757010-12-000025.txt'):
+def getText(url = 'https://www.sec.gov/Archives/edgar/data/757010/000075701012000025/0000757010-12-000025.txt', fileOut = None):
     #text file for html
-    f = open('output.txt', 'w')
+
+    f = fileOut if fileOut else tkFileDialog.asksaveasfile(mode='w', defaultextension=".txt")
+    #f = open('output', 'w')
 
     #open the website
     a = urllib2.urlopen(url)
@@ -55,13 +57,13 @@ def getText(url = 'https://www.sec.gov/Archives/edgar/data/757010/00007570101200
                 meta = accNum + '\t' + dt + '\t'
 
         #reached the end of the html file
-        if '</HTML>' in html[i]:
+        if '</HTML>' in html[i].upper():
             #break out of the for loop
             break
         #handle exception during parsings
         try:
             #find <TR tag, which stands for the beginning of each table row
-            if '<TR' in html[i]:
+            if '<TR' in html[i].upper():
                 #flag to signal the end of tr
                 notEndTR = True
                 #store the data from each row
@@ -71,7 +73,7 @@ def getText(url = 'https://www.sec.gov/Archives/edgar/data/757010/00007570101200
                     #Read each line of the html
                     line = html[i]
                     #check if the tag </TR> is in the line, ending each row
-                    notEndTR = '</TR>' not in line #termination condition
+                    notEndTR = '</TR>' not in line.upper() #termination condition
                     #Processing the line
                     for j in range(len(line)):
                         data = '' #empty string that store the data
@@ -103,7 +105,7 @@ def getText(url = 'https://www.sec.gov/Archives/edgar/data/757010/00007570101200
                         j+=1
 
                     #found an indentation mark
-                    if 'TEXT-INDENT:' in html[i]:
+                    if 'TEXT-INDENT:' in html[i].upper():
                         startIndent = html[i].find('TEXT-INDENT:')+13
                         endIndent = html[i].find('pt')
                         #update Indentation of the current indent

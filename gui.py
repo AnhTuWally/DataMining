@@ -2,10 +2,15 @@
 
 from Tkinter import Tk, Label, Frame, Entry, StringVar, LEFT, RIGHT, TOP, BOTTOM, Button
 import Tkconstants, tkFileDialog
-#import run
+import run
+import time
 
 class Gui():
     def __init__(self):
+
+        #output file
+        self.fileOut = None
+
         #The window entity
         self.root = Tk(className = 'Text Mining V1.0')
         #Set the default size
@@ -38,19 +43,29 @@ class Gui():
         self.clear = Button(self.buttonFrame, text = 'Clear', command = lambda : self.entry.delete(0, 'end'))
         self.clear.pack(side = LEFT)
         #function to submmitt
-        self.buttonSub = Button(self.buttonFrame, text='Generate Text',command = self.sub)
+        self.buttonSub = Button(self.buttonFrame, text='Generate Text', command = self.sub)
         self.buttonSub.pack(side = RIGHT)
+
+        #function to submmitt
+        self.buttonSub = Button(self.root, text='Save', command = self.setOutput)
+        self.buttonSub.pack()
 
         #show the window
         self.root.mainloop()
+
+    #function to set the output
+    def setOutput(self):
+        self.fileOut = tkFileDialog.asksaveasfile(mode='w', defaultextension=".txt")
 
     #function to run the program
     def sub(self):
         url = self.entry.get()
         if url:
+            self.statLabel.config(foreground="black")
             self.status.set('Processing')
+            time.sleep(1000)
             try:
-                #run.getText(url)
+                run.getText(url, fileOut = self.fileOut)
                 self.status.set('Done')
                 self.statLabel.config(foreground="magenta")
             except:
