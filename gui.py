@@ -2,7 +2,7 @@
 
 from Tkinter import Tk, Label, Frame, Entry, StringVar, LEFT, RIGHT, TOP, BOTTOM, Button
 import Tkconstants, tkFileDialog
-import run
+#import run
 
 class Gui():
     def __init__(self):
@@ -50,7 +50,7 @@ class Gui():
         if url:
             self.status.set('Processing')
             try:
-                run.getText(url)
+                #run.getText(url)
                 self.status.set('Done')
                 self.statLabel.config(foreground="magenta")
             except:
