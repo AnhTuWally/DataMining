@@ -6,7 +6,6 @@ url = 'https://www.sec.gov/Archives/edgar/data/757010/000075701012000025/0000757
 #text file for html
 f = open('test.txt', 'w')
 
-
 #open the website
 a = urllib2.urlopen(url)
 html = a.readlines()
@@ -26,7 +25,7 @@ dt = False
 comName = False
 
 #header
-f.write('\t'+'number_shares'+ '\t' + 'value'+ '\n')
+f.write('accession_num' +'\t'+ 'report_dt' + '\t' + '\t' + 'number_shares'+ '\t' + 'value'+ '\n')
 
 #Initial editing
 for i in range(len(html)):
@@ -54,21 +53,25 @@ for i in range(len(html)):
         #all metadata are collected
         if accNum and dt and comName:
             f.write(accNum + '\t' + dt + '\t' + comName + '\n')
-            meta = True
+            meta = accNum + '\t' + dt + '\t'
 
     #reached the end of the html file
     if '</HTML>' in html[i]:
+        #break out of the for loop
         break
     #handle exception during parsings
     try:
+        #find <TR tag, which stands for the beginning of each table row
         if '<TR' in html[i]:
             #flag to signal the end of tr
             notEndTR = True
-            count = 0
+            #store the data from each row
             row = ''
+            #iterate through the whole <TR
             while notEndTR:
+                #Read each line of the html
                 line = html[i]
-                #check if the tag </TR> is in the line
+                #check if the tag </TR> is in the line, ending each row
                 notEndTR = '</TR>' not in line #termination condition
                 #Processing the line
                 for j in range(len(line)):
@@ -79,8 +82,6 @@ for i in range(len(html)):
                         if j < len(line)-1: j+=1
 
                         while line[j] != '<' and j < len(line)-1:
-                            #f.write(line[j])
-
                             #delete the dorlar sign
                             if line[j] == '$':
                                 pass
@@ -89,15 +90,16 @@ for i in range(len(html)):
                             #increment
                             j+=1
 
-                        #replacing item with [space]
+                        #deleting the &nbsp;
                         data = '' if data == '&nbsp;' else data
+
                         #seperator between data
                         if '&nbsp;' not in line and '$' not in line:
                             if data !='':
                                 #print data
                                 data = '\t' + data
+                        #add data to row
                         row += data
-                        #f.write(data)
                     #increment to next td
                     j+=1
 
@@ -121,17 +123,18 @@ for i in range(len(html)):
                         nextIndent = float(html[nx][startIndent:endIndent])
                     except IndexError:
                         nextIndent = rowIndent
-
                 #increment to next tr
                 i+=1
 
             #TR ended
             if row and row[0]=='\t':
                 row = row[1:]
-
+            #split row into tuple for data processing
             rowArray = row.split('\t')
             if rowArray[0]:
+                #reset valid data
                 validData = True
+                #find the number data at the end of each row
                 if len(rowArray) >= 2:
                     data1 = rowArray.pop()
                     data2 = rowArray.pop()
@@ -139,37 +142,49 @@ for i in range(len(html)):
                         int(data1[0])
                         int(data2[0])
                     except ValueError:
+                        #if the thrid and fourth row is not a number, thus no need to process this data
                         validData = False
+                    #rejoin the number data
                     data3 = '\t' + data2 + '\t' + data1
                     data4 = ' '.join(rowArray)
+                    #rebuild the row
                     row = data4 + data3
+                    #split the data again for information
                     rowArray = row.split('\t')
                 if validData:
                     #If there is a row less than 2
                     if len(rowArray) < 2:
-                        #indentation fix
-                        #print rowIndent, ' - ', nextIndent
+                        #indentation fix, if the next indentation is bigger than the current indentation
                         if rowIndent < nextIndent:
                             fix = True
                             firstRow = True
+                            #the change is too big, this is a change in page
+                            if abs(rowIndent - nextIndent) < 100:
+                                #cumulative prefix
+                                if row not in prefix:
+                                    prefix += row + ' '
                         else:
                             #pass if the row indentation is too big, signify the change of page
                             if abs(rowIndent - nextIndent) > 100:
                                 pass
                             else:
+                                #new data set, reset everything
                                 row += '\n'
                                 fix = False
+                                prefix = ''
                                 firstRow = False
-                        #the change is too big, this is a change in page
-                        if abs(rowIndent - nextIndent) < 100:
-                            prefix = row + ' '
                     #If the row array is not less than 2, but it need to be fixed
                     elif fix:
+                        #fixing the row indentation of data set
                         row = prefix + row + '\n'
+                        #ignore page changes
                         if 1 < abs(rowIndent - nextIndent) < 100:
                             fix = False
+                            prefix = ''
                     else:
+                        #no indentation difference
                         row += '\n'
+                        prefix = ''
 
                     #dont'r write the first row of indentation
                     if firstRow:
@@ -177,7 +192,8 @@ for i in range(len(html)):
                         pass
                     else:
                         if len(rowArray) > 2:
-                            f.write(row)
+                            f.write(meta + row)
+                            #f.write(row)
     except IndexError:
         #handeling the mess at the end of text file
         print 'Error'
